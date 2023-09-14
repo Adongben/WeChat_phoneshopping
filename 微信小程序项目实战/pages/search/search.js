@@ -1,0 +1,108 @@
+import request from "../../util/request"
+// pages/search/search.js
+Page({
+
+  /**
+   * 页面的初始数据
+   */
+  data: {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad(options) {
+    this.setData({
+      // bind 修改this的指向
+      search: this.search.bind(this)
+    })
+  },
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady() {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow() {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面隐藏
+   */
+  onHide() {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面卸载
+   */
+  onUnload() {
+
+  },
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh() {
+
+  },
+
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom() {
+
+  },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+
+  },
+  search(value){
+    return Promise.all([
+      request({
+        url:`/categories?title_like=${value}`
+      }), // json server 支持路径模糊查询 ？要匹配的属性名 _like=相似的值(包含的)
+      request({
+        url:`/goods?title_like=${value}`
+      })
+    ]).then(res=>{
+      // 搜索结果由text字段显示
+      // 分别展开两个接口模糊查询返回的数据并加上text字段
+      return [...res[0].map(item=>({
+        ...item,
+        text:item.title,
+        type:1 // 分类
+      })),...res[1].map(item=>({
+        ...item,
+        text:item.title,
+        type:2 // 详情
+      }))]
+    })
+  },
+  selectResult(e){
+    console.log(e.detail)
+    if(e.detail.item.type===1){
+      // 搜索列表 分类
+      // console.log("分类")
+      wx.navigateTo({
+        url: `/pages/searchlist/searchlist?id=${e.detail.item.id}&name=${e.detail.item.title}`,
+      })
+    }else{
+      // 详情页面
+      // console.log("详情页面")
+      wx.navigateTo({
+        url:`/pages/detail/detail?id=${e.detail.item.id}&name=${e.detail.item.title}`,
+      })
+    }
+  }
+})
